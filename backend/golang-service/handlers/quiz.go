@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"golang-service/config"
 	"golang-service/models"
 	"golang-service/services"
@@ -25,6 +26,7 @@ func GetQuizStateByPhone(c *gin.Context) {
 	phone = strings.TrimPrefix(phone, "+")
 	phone = strings.TrimSpace(phone)
 	fmt.Printf("GetQuizStateByPhone - phone: '%s' len: %d\n", phone, len(phone))
+	phoneCandidates := phoneLookupCandidates(phone)
 
 	var result struct {
 		QuizID         int    `db:"quiz_id" json:"quiz_id"`
@@ -47,10 +49,13 @@ func GetQuizStateByPhone(c *gin.Context) {
         FROM quizzes q
         LEFT JOIN users u ON u.id = q.user_id
         LEFT JOIN whatsapp_quiz_sessions ws ON ws.quiz_id = q.id AND ws.active = true
-        WHERE (u.phone = $1 OR ws.phone = $1)
+        WHERE (
+            regexp_replace(COALESCE(u.phone, ''), '\D', '', 'g') = ANY($1)
+            OR regexp_replace(COALESCE(ws.phone, ''), '\D', '', 'g') = ANY($1)
+        )
         AND q.status = 'in_progress'
         ORDER BY q.created_at DESC LIMIT 1
-    `, phone)
+    `, pq.Array(phoneCandidates))
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No active quiz found for this phone"})
@@ -58,6 +63,41 @@ func GetQuizStateByPhone(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func phoneLookupCandidates(phone string) []string {
+	digitsOnly := strings.Map(func(r rune) rune {
+		if r >= '0' && r <= '9' {
+			return r
+		}
+		return -1
+	}, phone)
+
+	if digitsOnly == "" {
+		return []string{phone}
+	}
+
+	candidates := []string{digitsOnly}
+	if len(digitsOnly) > 10 {
+		candidates = append(candidates, digitsOnly[len(digitsOnly)-10:])
+	}
+	if strings.HasPrefix(digitsOnly, "91") && len(digitsOnly) > 2 {
+		candidates = append(candidates, strings.TrimPrefix(digitsOnly, "91"))
+	}
+
+	seen := make(map[string]struct{}, len(candidates))
+	uniq := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		if candidate == "" {
+			continue
+		}
+		if _, ok := seen[candidate]; ok {
+			continue
+		}
+		seen[candidate] = struct{}{}
+		uniq = append(uniq, candidate)
+	}
+	return uniq
 }
 
 func MarkQuizInProgress(c *gin.Context) {
@@ -237,24 +277,31 @@ func StartQuiz(c *gin.Context) {
 		ORDER BY created_at DESC LIMIT 1
 	`, body.ChatID)
 	if err == nil {
-		// Check if the existing quiz has questions
-		var questionCount int
-		config.DB.Get(&questionCount, `SELECT COUNT(*) FROM quiz_questions WHERE quiz_id=$1`, existingQuiz.ID)
+		sameTopic := strings.EqualFold(strings.TrimSpace(existingQuiz.Topic), strings.TrimSpace(body.Topic))
 
-		if questionCount > 0 {
-			// Quiz exists with questions - return it so user can continue
-			c.JSON(http.StatusOK, gin.H{
-				"message":         "Resuming existing quiz",
-				"quiz_id":         existingQuiz.ID,
-				"topic":           existingQuiz.Topic,
-				"total_questions": existingQuiz.TotalQues,
-				"existing":        true,
-			})
-			return
-		} else {
-			// Quiz exists but has no questions (likely failed generation) - delete it and create new one
-			fmt.Printf("Existing quiz %d has no questions, deleting and creating new one\n", existingQuiz.ID)
+		if !sameTopic {
+			fmt.Printf("Existing quiz %d topic '%s' does not match requested topic '%s', creating a new quiz\n", existingQuiz.ID, existingQuiz.Topic, body.Topic)
 			config.DB.Exec(`DELETE FROM quizzes WHERE id=$1`, existingQuiz.ID)
+		} else {
+		// Check if the existing quiz has questions
+			var questionCount int
+			config.DB.Get(&questionCount, `SELECT COUNT(*) FROM quiz_questions WHERE quiz_id=$1`, existingQuiz.ID)
+
+			if questionCount > 0 {
+				// Quiz exists with questions - return it so user can continue
+				c.JSON(http.StatusOK, gin.H{
+					"message":         "Resuming existing quiz",
+					"quiz_id":         existingQuiz.ID,
+					"topic":           existingQuiz.Topic,
+					"total_questions": existingQuiz.TotalQues,
+					"existing":        true,
+				})
+				return
+			} else {
+				// Quiz exists but has no questions (likely failed generation) - delete it and create new one
+				fmt.Printf("Existing quiz %d has no questions, deleting and creating new one\n", existingQuiz.ID)
+				config.DB.Exec(`DELETE FROM quizzes WHERE id=$1`, existingQuiz.ID)
+			}
 		}
 	}
 
