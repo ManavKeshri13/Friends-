@@ -195,7 +195,7 @@ function Hero() {
           textShadow: `0 0 80px ${C.accentGlow}, 0 0 160px ${C.accentGlow}`,
         }}
       >
-        Khoj
+        Qru
       </motion.h1>
 
       {/* Divider line with accent dots */}
@@ -332,7 +332,7 @@ function Footer() {
   return (
     <footer className="relative z-10 border-t py-8 text-center text-xs uppercase tracking-widest"
       style={{ borderColor: C.border, color: C.muted }}>
-      © {new Date().getFullYear()} Khoj — All rights reserved
+      © {new Date().getFullYear()} Qru — All rights reserved
     </footer>
   );
 }

@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Khoj – Your Learning Companion",
-  description: "Khoj helps you learn anything through personalised AI-powered conversations.",
+  title: "Qru – Your Learning Companion",
+  description: "Qru helps you learn anything through personalised AI-powered conversations.",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

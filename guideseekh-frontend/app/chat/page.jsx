@@ -490,7 +490,7 @@ export default function ChatPage() {
             What do you want to learn?
           </h2>
           <p className="text-gray-400 mb-8 text-sm leading-relaxed max-w-sm mx-auto">
-            Click below to open a new chat. Khoj will automatically detect your topic from your first message.
+            Click below to open a new chat. Qru will automatically detect your topic from your first message.
           </p>
           {error && (
             <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4">
@@ -792,7 +792,7 @@ export default function ChatPage() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[oklch(64.6%_0.222_41.116)] to-[oklch(50%_0.15_30)] flex items-center justify-center shrink-0 shadow-lg text-white text-xs font-semibold">
                 {username ? username.charAt(0).toUpperCase() : "K"}
               </div>
-              <span className="flex-1 text-sm font-medium text-gray-200 text-left truncate">{username || "Khoj Account"}</span>
+              <span className="flex-1 text-sm font-medium text-gray-200 text-left truncate">{username || "Qru Account"}</span>
               <svg className={`w-4 h-4 text-gray-500 transition-transform ${showProfileMenu ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
             </button>
           </div>
@@ -805,7 +805,7 @@ export default function ChatPage() {
         <div className="absolute top-0 w-full z-10 bg-gradient-to-b from-[#000000]/80 via-[#000000]/50 to-transparent pt-3 pb-8 pl-12 lg:pl-4 pr-4">
           <div className="flex items-center justify-between max-w-4xl mx-auto">
             <span className="text-gray-400 text-sm font-medium hover:text-gray-200 transition cursor-pointer flex items-center gap-1.5">
-              Khoj <span className="opacity-50">/</span> {topic ? topic : "New topic"}
+              Qru <span className="opacity-50">/</span> {topic ? topic : "New topic"}
             </span>
             <div className="flex items-center">
               <button
@@ -824,7 +824,7 @@ export default function ChatPage() {
             {messages.length === 0 ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto mb-[20vh]">
                 <div className="w-16 h-16 rounded-2xl overflow-hidden mb-6 shadow-xl shrink-0">
-                  <img src="/logo.png" alt="Khoj" className="w-full h-full object-cover" />
+                  <img src="/logo.png" alt="Qru" className="w-full h-full object-cover" />
                 </div>
                 <h2 className="text-2xl font-medium mb-2 text-white">How can I help you learn?</h2>
                 <p className="text-gray-400 text-sm">
@@ -851,7 +851,7 @@ export default function ChatPage() {
                       <div className="flex-shrink-0 mt-0.5 hidden sm:block">
                         {message.role === "bot" ? (
                           <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 shadow-lg">
-                            <img src="/logo.png" alt="Khoj" className="w-full h-full object-cover" />
+                            <img src="/logo.png" alt="Qru" className="w-full h-full object-cover" />
                           </div>
                         ) : null}
                       </div>
@@ -861,7 +861,7 @@ export default function ChatPage() {
                         {message.role === "bot" ? (
                           <div className="text-gray-100 text-[15px] leading-[1.9] w-full">
                              <div className="sm:hidden w-6 h-6 mb-2 rounded-full overflow-hidden shadow-lg">
-                                <img src="/logo.png" alt="Khoj" className="w-full h-full object-cover" />
+                                <img src="/logo.png" alt="Qru" className="w-full h-full object-cover" />
                               </div>
                             <TypewriterMessage text={message.content} messageId={message.id} isNew={newBotMessages.has(message.id)} />
                           </div>
@@ -880,7 +880,7 @@ export default function ChatPage() {
                     <div className="max-w-3xl w-full flex gap-4 md:gap-5">
                       <div className="flex-shrink-0 mt-0.5 hidden sm:block">
                         <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 opacity-60">
-                          <img src="/logo.png" alt="Khoj" className="w-full h-full object-cover" />
+                          <img src="/logo.png" alt="Qru" className="w-full h-full object-cover" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 pt-[10px]">
@@ -922,7 +922,7 @@ export default function ChatPage() {
                     if (!loading) sendMessage();
                   }
                 }}
-                placeholder={topic ? `Ask anything about ${topic}...` : "Message Khoj..."}
+                placeholder={topic ? `Ask anything about ${topic}...` : "Message Qru..."}
                 disabled={loading || !chatId}
                 rows={1}
                 className="w-full max-h-[200px] min-h-[56px] bg-transparent text-gray-100 placeholder-gray-500 px-5 py-4 resize-none focus:outline-none text-[15px] leading-relaxed rounded-3xl"
@@ -943,7 +943,7 @@ export default function ChatPage() {
             </div>
             
             <div className="text-center mt-3">
-              <span className="text-[11px] text-gray-500 font-medium">Khoj can make mistakes. Consider verifying important information.</span>
+              <span className="text-[11px] text-gray-500 font-medium">Qru can make mistakes. Consider verifying important information.</span>
             </div>
           </div>
         </div>
